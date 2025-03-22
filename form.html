@@ -1,31 +1,435 @@
-
 <!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Visa Information</title>
-    <link rel="stylesheet" href="style.css">
+    <title>Visa Checker - Server Side</title>
+    <style>
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+        
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: #f5f7fa;
+            background-image: linear-gradient(135deg, #f5f7fa 0%, #e4e8f0 100%);
+            color: #333;
+            line-height: 1.6;
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 30px;
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+        }
+        
+        .card {
+            background-color: white;
+            border-radius: 10px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+            padding: 30px;
+            margin-bottom: 30px;
+            transition: all 0.5s cubic-bezier(0.165, 0.84, 0.44, 1);
+            animation: slideIn 0.8s ease-out forwards;
+            opacity: 0;
+            transform: translateY(30px);
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .card::after {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 5px;
+            background: linear-gradient(90deg, #3a56e4, #5e72e4, #8a5ce4);
+            transform: scaleX(0);
+            transform-origin: left;
+            transition: transform 0.6s ease;
+        }
+        
+        .card:hover {
+            transform: translateY(-10px);
+            box-shadow: 0 15px 35px rgba(58, 86, 228, 0.2);
+        }
+        
+        .card:hover::after {
+            transform: scaleX(1);
+        }
+        
+        @keyframes slideIn {
+            0% {
+                opacity: 0;
+                transform: translateY(30px);
+            }
+            100% {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+        
+        h1 {
+            color: #3a56e4;
+            margin-bottom: 25px;
+            text-align: center;
+            font-size: 32px;
+            position: relative;
+            padding-bottom: 15px;
+            animation: fadeIn 1s ease-out 0.4s forwards;
+            opacity: 0;
+        }
+        
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+        
+        h1::after {
+            content: '';
+            position: absolute;
+            bottom: 0;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 80px;
+            height: 3px;
+            background: linear-gradient(to right, #3a56e4, #5e72e4);
+            border-radius: 3px;
+            animation: growLine 1s ease-out 0.8s forwards;
+            transform-origin: center;
+            transform: translateX(-50%) scaleX(0);
+        }
+        
+        @keyframes growLine {
+            from { transform: translateX(-50%) scaleX(0); }
+            to { transform: translateX(-50%) scaleX(1); }
+        }
+        
+        .subtitle {
+            text-align: center;
+            color: #666;
+            margin-bottom: 30px;
+            font-size: 16px;
+            animation: fadeIn 1s ease-out 0.6s forwards;
+            opacity: 0;
+        }
+        
+        .form-group {
+            margin-bottom: 25px;
+            animation: fadeIn 1s ease-out 0.8s forwards;
+            opacity: 0;
+            position: relative;
+        }
+        
+        label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: 600;
+            color: #444;
+            font-size: 16px;
+            transition: all 0.3s;
+        }
+        
+        select {
+            width: 100%;
+            padding: 12px 15px;
+            border: 2px solid #ddd;
+            border-radius: 6px;
+            font-size: 16px;
+            transition: all 0.3s cubic-bezier(0.165, 0.84, 0.44, 1);
+            background-color: #f9fafc;
+            color: #444;
+            appearance: none;
+            background-image: url("data:image/svg+xml;charset=US-ASCII,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20width%3D%22292.4%22%20height%3D%22292.4%22%3E%3Cpath%20fill%3D%22%23666%22%20d%3D%22M287%2069.4a17.6%2017.6%200%200%200-13-5.4H18.4c-5%200-9.3%201.8-12.9%205.4A17.6%2017.6%200%200%200%200%2082.2c0%205%201.8%209.3%205.4%2012.9l128%20127.9c3.6%203.6%207.8%205.4%2012.8%205.4s9.2-1.8%2012.8-5.4L287%2095c3.5-3.5%205.4-7.8%205.4-12.8%200-5-1.9-9.2-5.5-12.8z%22%2F%3E%3C%2Fsvg%3E");
+            background-repeat: no-repeat;
+            background-position: right 15px top 50%;
+            background-size: 12px auto;
+        }
+        
+        select:focus {
+            border-color: #3a56e4;
+            box-shadow: 0 0 0 4px rgba(58, 86, 228, 0.15);
+            outline: none;
+        }
+        
+        .select-wrapper {
+            position: relative;
+        }
+        
+        .select-wrapper::after {
+            content: '';
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            width: 0;
+            height: 2px;
+            background: linear-gradient(90deg, #3a56e4, #5e72e4);
+            transition: width 0.4s ease;
+        }
+        
+        .select-wrapper:focus-within::after {
+            width: 100%;
+        }
+        
+        button {
+            background: linear-gradient(45deg, #3a56e4, #5e72e4);
+            color: white;
+            padding: 14px 24px;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 16px;
+            font-weight: 600;
+            width: 100%;
+            transition: all 0.3s cubic-bezier(0.165, 0.84, 0.44, 1);
+            box-shadow: 0 4px 6px rgba(58, 86, 228, 0.15);
+            position: relative;
+            overflow: hidden;
+            animation: fadeIn 1s ease-out 1s forwards;
+            opacity: 0;
+            z-index: 1;
+        }
+        
+        button::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, rgba(255,255,255,0.1), rgba(255,255,255,0.4), rgba(255,255,255,0.1));
+            transition: all 0.6s ease;
+            z-index: -1;
+        }
+        
+        button:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 7px 14px rgba(58, 86, 228, 0.25);
+            background: linear-gradient(45deg, #2c44c9, #4a61e2);
+        }
+        
+        button:hover::before {
+            left: 100%;
+        }
+        
+        button:active {
+            transform: translateY(2px);
+            box-shadow: 0 3px 10px rgba(58, 86, 228, 0.2);
+        }
+        
+        .footer {
+            text-align: center;
+            margin-top: 30px;
+            color: #666;
+            font-size: 14px;
+            animation: fadeIn 1s ease-out 1.2s forwards;
+            opacity: 0;
+        }
+        
+        .flag-options option {
+            padding-left: 30px;
+        }
+        
+        .loading {
+            display: none;
+            text-align: center;
+            margin-top: 20px;
+            opacity: 0;
+            animation: fadeIn 0.5s ease-out forwards;
+        }
+        
+        .loading-spinner {
+            display: inline-block;
+            width: 40px;
+            height: 40px;
+            border: 3px solid rgba(58, 86, 228, 0.3);
+            border-radius: 50%;
+            border-top-color: #3a56e4;
+            animation: spin 1s ease-in-out infinite;
+        }
+        
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+        
+        .pulse {
+            animation: pulse 2s infinite;
+        }
+        
+        @keyframes pulse {
+            0% {
+                transform: scale(1);
+            }
+            50% {
+                transform: scale(1.05);
+            }
+            100% {
+                transform: scale(1);
+            }
+        }
+        
+        /* Country icons/flags styling */
+        select option[value="USA"]::before {
+            content: "🇺🇸";
+            margin-right: 10px;
+        }
+        
+        .tooltip {
+            position: absolute;
+            bottom: 100%;
+            left: 50%;
+            transform: translateX(-50%);
+            background: #333;
+            color: white;
+            padding: 8px 12px;
+            border-radius: 4px;
+            font-size: 14px;
+            opacity: 0;
+            pointer-events: none;
+            transition: all 0.3s ease;
+            white-space: nowrap;
+        }
+        
+        .tooltip::after {
+            content: '';
+            position: absolute;
+            top: 100%;
+            left: 50%;
+            margin-left: -5px;
+            border-width: 5px;
+            border-style: solid;
+            border-color: #333 transparent transparent transparent;
+        }
+    </style>
 </head>
 <body>
-
-    <div class="form_validation">
-        <h2>Visa Information Form</h2>
-        <form method="POST" action="file.php">
-            <label for="Countries">Select Country:</label>
-            <select name="Countries" id="Countries">
-                <option value="6">--Select a Country--</option>
-                <option value="1">USA</option>
-                <option value="2">CANADA</option>
-                <option value="3">India</option>
-                <option value="4">UK</option>
-                <option value="5">Australia</option>
-            </select>
-            <br><br>
-            <button type="submit" id="btn">Submit</button>
+    <div class="card">
+        <h1>Visa Requirement Checker</h1>
+        <p class="subtitle">Check visa requirements by selecting your destination country</p>
+        
+        <form action="process.php" method="post" id="visaForm">
+            <div class="form-group">
+                <label for="country">Select Destination Country:</label>
+                <div class="select-wrapper">
+                    <select id="country" name="country" class="flag-options">
+                        <option value="">-- Select a country --</option>
+                        <option value="USA">United States of America</option>
+                        <option value="Canada">Canada</option>
+                        <option value="India">India</option>
+                        <option value="UK">United Kingdom</option>
+                        <option value="Australia">Australia</option>
+                    </select>
+                </div>
+                <div class="tooltip" id="selectTooltip">Select a country to check requirements</div>
+            </div>
+            
+            <button type="submit" id="submitBtn">Check Visa Requirements</button>
         </form>
         
+        <div class="loading" id="loading">
+            <div class="loading-spinner"></div>
+            <p>Checking requirements...</p>
+        </div>
     </div>
-
+    
+    <div class="footer">
+        <p>© 2025 Visa Information Service. Updated information as of March 2025.</p>
+    </div>
+    
+    <script>
+        // Add loading spinner and animations on form submit
+        document.addEventListener('DOMContentLoaded', function() {
+            const form = document.getElementById('visaForm');
+            const submitBtn = document.getElementById('submitBtn');
+            const countrySelect = document.getElementById('country');
+            const loading = document.getElementById('loading');
+            const tooltip = document.getElementById('selectTooltip');
+            
+            // Show tooltip on select focus
+            countrySelect.addEventListener('focus', function() {
+                tooltip.style.opacity = '1';
+                tooltip.style.bottom = 'calc(100% + 10px)';
+            });
+            
+            countrySelect.addEventListener('blur', function() {
+                tooltip.style.opacity = '0';
+                tooltip.style.bottom = '100%';
+            });
+            
+            // Pulse animation on empty select
+            countrySelect.addEventListener('change', function() {
+                if (this.value) {
+                    submitBtn.classList.add('pulse');
+                    setTimeout(() => {
+                        submitBtn.classList.remove('pulse');
+                    }, 1000);
+                }
+            });
+            
+            // Button ripple effect
+            submitBtn.addEventListener('mousedown', function(e) {
+                const ripple = document.createElement('div');
+                ripple.classList.add('ripple');
+                this.appendChild(ripple);
+                
+                const rect = this.getBoundingClientRect();
+                const size = Math.max(rect.width, rect.height);
+                
+                ripple.style.width = ripple.style.height = `${size}px`;
+                ripple.style.left = `${e.clientX - rect.left - size/2}px`;
+                ripple.style.top = `${e.clientY - rect.top - size/2}px`;
+                
+                ripple.classList.add('active');
+                
+                setTimeout(() => {
+                    ripple.remove();
+                }, 500);
+            });
+            
+            form.addEventListener('submit', function(e) {
+                const country = countrySelect.value;
+                
+                if (!country) {
+                    e.preventDefault();
+                    countrySelect.style.borderColor = '#e53e3e';
+                    countrySelect.classList.add('shake');
+                    
+                    setTimeout(() => {
+                        countrySelect.classList.remove('shake');
+                    }, 500);
+                    
+                    return false;
+                }
+                
+                loading.style.display = 'block';
+                submitBtn.disabled = true;
+                submitBtn.textContent = 'Processing...';
+                
+                // Add CSS transition for smooth animation
+                submitBtn.style.backgroundColor = '#2c44c9';
+                submitBtn.style.transform = 'scale(0.98)';
+            });
+            
+            // Add country flag emojis for visual enhancement
+            const flagMap = {
+                'USA': '🇺🇸',
+                'Canada': '🇨🇦',
+                'India': '🇮🇳',
+                'UK': '🇬🇧',
+                'Australia': '🇦🇺'
+            };
+            
+            // Update select options with flag emojis
+            Array.from(countrySelect.options).forEach(option => {
+                if (option.value && flagMap[option.value]) {
+                    option.textContent = `${flagMap[option.value]} ${option.textContent}`;
+                }
+            });
+        });
+    </script>
 </body>
 </html>
